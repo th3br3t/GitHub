@@ -9,7 +9,7 @@
    All deleted files will go into a log transcript on the Desktop of the user running the script. By default this `
    script leaves files that are newer than 7 days old however this variable can be edited.
 .EXAMPLE
-   PS C:\Users\mkerfoot\Desktop\Powershell> .\cleanup_log.ps1
+   PS C:\Users\Username\Desktop> .\cleanup_log.ps1
    Save the file to your desktop with a .PS1 extention and run the file from an elavated PowerShell prompt.
 .NOTES
    This script will typically clean up anywhere from 1GB up to 15GB of space from a C: drive.
@@ -22,9 +22,9 @@ $Version = ([system.environment]::osversion).version.tostring()
 
 #Log Off Disconnected Sessions
 Function LogOff {
-$TSLogFile = "$env:USERPROFILE\Desktop\Sessions " + $TimeStamp + ".log"
-function Write-Log([string]$message)
-{
+    $TSLogFile = "$env:USERPROFILE\Desktop\Sessions " + $TimeStamp + ".log"
+
+Function Write-Log([string]$message) {
    Out-File -InputObject $message -FilePath $TSLogFile -Append
 }
  
@@ -80,7 +80,7 @@ Write-Log -Message "Finished"
 
 #Cleanup Disk
 Function Cleanup {
-function global:Write-Verbose ( [string]$Message )
+Function global:Write-Verbose ( [string]$Message )
 
 # check $VerbosePreference variable, and turns -Verbose on
 { if ( $VerbosePreference -ne 'SilentlyContinue' )
