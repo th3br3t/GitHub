@@ -99,7 +99,7 @@ Start-Transcript -Path "$env:UserProfile\Desktop\$env:ComputerName Disk Cleanup.
 Clear-Host
 
 ## Lists large files based on extension in Users Directories.
-$size = Get-ChildItem C:\Users\* -Include *.iso, *.vhd -Recurse -ErrorAction SilentlyContinue | 
+$size = Get-ChildItem C:\Users\* -Include *.iso, *.vhd -Recurse -EA 0 | 
 Sort Length -Descending | 
 Select-Object Name, Directory,
 @{Name="Size (GB)";Expression={ "{0:N2}" -f ($_.Length / 1GB) }} |
@@ -114,44 +114,49 @@ $Before = Get-WmiObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq "3" 
 Format-Table -AutoSize | Out-String                      
                     
 ## Stops the windows update service. 
-Get-Service -Name wuauserv | Stop-Service -Force -Verbose -ErrorAction SilentlyContinue
+Get-Service -Name wuauserv | Stop-Service -Force -Verbose -EA 0
 ## Windows Update Service has been stopped successfully!
 
 ## Deletes the contents of windows software distribution.
-Get-ChildItem "C:\Windows\SoftwareDistribution\*" -Recurse -Force -Verbose -ErrorAction SilentlyContinue |
+Get-ChildItem "C:\Windows\SoftwareDistribution\*" -Recurse -Force -Verbose -EA 0 |
 Where-Object { ($_.CreationTime -lt $(Get-Date).AddDays(-$DaysToDelete)) } |
-remove-item -force -Verbose -recurse -ErrorAction SilentlyContinue
+remove-item -force -Verbose -recurse -EA 0
 ## The Contents of Windows SoftwareDistribution have been removed successfully!
 
 ## Deletes the contents of the Windows Temp folder.
-Get-ChildItem "C:\Windows\Temp\*" -Recurse -Force -Verbose -ErrorAction SilentlyContinue |
+Get-ChildItem "C:\Windows\Temp\*" -Recurse -Force -Verbose -EA 0 |
 Where-Object { ($_.CreationTime -lt $(Get-Date).AddDays(-$DaysToDelete)) } |
-remove-item -force -Verbose -recurse -ErrorAction SilentlyContinue
+remove-item -force -Verbose -recurse -EA 0
 ## The Contents of Windows Temp have been removed successfully!
              
 ## Deletes all files and folders in user's Temp folder. 
-Get-ChildItem "C:\users\*\AppData\Local\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue |
+Get-ChildItem "C:\users\*\AppData\Local\Temp\*" -Recurse -Force -EA 0 |
 Where-Object { ($_.CreationTime -lt $(Get-Date).AddDays(-$DaysToDelete))} |
-remove-item -force -Verbose -recurse -ErrorAction SilentlyContinue
+remove-item -force -Verbose -recurse -EA 0
 ## The contents of C:\users\$env:USERNAME\AppData\Local\Temp\ have been removed successfully!
                     
 ## Removes all files and folders in user's Temporary Internet Files. 
 Get-ChildItem "C:\users\*\AppData\Local\Microsoft\Windows\Temporary Internet Files\*" `
--Recurse -Force -Verbose -ErrorAction SilentlyContinue |
+-Recurse -Force -Verbose -EA 0 |
 Where-Object {($_.CreationTime -le $(Get-Date).AddDays(-$DaysToDelete))} |
-remove-item -force -recurse -ErrorAction SilentlyContinue
+remove-item -force -recurse -EA 0
 ## All Temporary Internet Files have been removed successfully!
  
 ## Cleans IIS Logs if applicable.
-Get-ChildItem "C:\inetpub\logs\LogFiles\*" -Recurse -Force -ErrorAction SilentlyContinue |
+Get-ChildItem "C:\inetpub\logs\LogFiles\*" -Recurse -Force -EA 0 |
 Where-Object { ($_.CreationTime -le $(Get-Date).AddDays(-7)) } |
-Remove-Item -Force -Verbose -Recurse -ErrorAction SilentlyContinue
+Remove-Item -Force -Verbose -Recurse -EA 0
 ## All IIS Logfiles over x days old have been removed Successfully!
 
 ## Deletes all log files in C:\ larger than 5MB.
-Get-ChildItem -path "C:\" -Recurse -Force -Verbose -ErrorAction SilentlyContinue -include ("*.log", "*.txt") | 
+#Delete only .log extensions
+Get-ChildItem -path "C:\" -Recurse -Force -Verbose -EA 0 -include ("*.log") |
+
+#Delete .log & .txt extensions
+#Get-ChildItem -path "C:\" -Recurse -Force -Verbose -EA 0 -include ("*.log", "*.txt") | 
+
 Where-Object {$_.Length -gt 5MB} |
-Remove-Item -Recurse -Force -Verbose -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force -Verbose -EA 0
 ## All log files in C:\ larger than 5MB have been removed successfully!
                   
 ## Empties the contents of the recycling bin.
